@@ -5,6 +5,8 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 char *childProcess = "./bin_adder";
 
@@ -31,36 +33,64 @@ void alarm_handler(int signum){
 }
 
 int main(int argc, char *argv[]){
-    //unsigned int lengthOfInput;
+    
     int *inputNumbers;
-    //pid_t wpid;
-    //int status=0;
+
+    int shmid;
+    int *shmptr;
+    key_t key;
+    //char *shm;
+    //char *s;
+
+    key = 9876;
+
+
+
+
 
     int var[] = {6, 15, 4, 10, 8, 19, 15 ,2};
 
+    
+
     size_t n = sizeof(var)/sizeof(int);
+
+    shmid = shmget(key, n, IPC_CREAT | 0666);
+    if(shmid < 0){
+        perror("shmget");
+        exit(EXIT_FAILURE);
+    }
 
     inputNumbers = &var[0];
 
     signal(SIGALRM, alarm_handler);
 
     printf("size=%zu", n);
-    int i = 0;
-    for(i =0; i<n; i++){
-        printf("%d ", inputNumbers[i]);
+    shmptr = (int *)shmat(shmid, 0, 0);
+	if (shmptr == (int *) -1){
+		perror("Error: Could not attach shared memory");
+		exit(EXIT_FAILURE);
+	}
+
+    int index = 0;
+    while(*inputNumbers){
+        printf("%d ", *inputNumbers);
+        shmptr[index++] = *inputNumbers;
+        inputNumbers++;
     }
+
+
+
+    //shmptr = inputNumbers;
+
     fflush(stdout);
 
     pid_t cpid = create_child();
 
-    //while ((wpid = wait(NULL)) > 0); 
     waitpid(cpid, NULL, 0);
     
-    printf("Parent process closed");
+    printf("\nParent process closed");
 
     fflush(stdout);
 
-
     return 0;
 }
-
