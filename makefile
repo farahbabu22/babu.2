@@ -1,5 +1,5 @@
 CLASSES=
-CC = GCC
+CC = gcc
 CXXFLAGS= -g -Wall -pthread
 
 all: master bin_adder

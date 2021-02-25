@@ -3,6 +3,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 char *childProcess = "./bin_adder";
 
@@ -43,7 +45,8 @@ int main(int argc, char *argv[]){
     signal(SIGALRM, alarm_handler);
 
     printf("size=%zu", n);
-    for(int i =0; i<n; i++){
+    int i = 0;
+    for(i =0; i<n; i++){
         printf("%d ", inputNumbers[i]);
     }
     fflush(stdout);
