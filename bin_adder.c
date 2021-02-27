@@ -10,17 +10,19 @@
 
 int main(int argc, char *argv[]){
 
-    //int *inputNumbers;
+
 
     int shmid;
     int *shmptr;
     key_t key;
-    //char *shm;
-    //char *s;
+
+    int index = atoi(argv[1]);
+    int jump = atoi(argv[2]);
+
 
     key = 9876;
 
-    printf("Child Process\n");
+    //printf("Child Process with argument index=%d jump=%d\n", index, jump);
     fflush(stdout);
 
     shmid = shmget(key, BUFF_SZ, 0666);
@@ -31,12 +33,36 @@ int main(int argc, char *argv[]){
 
     int i = 0;
     shmptr = (int *) shmat(shmid, 0, 0);
-    for(i=0; i<8; i++){
-        printf("%d ", shmptr[i]);
+
+    int sum = 0;
+
+    int val = 0;
+
+    printf("\nThe values from child: ");
+
+    while(*shmptr){
+        val = *shmptr++;
+        if(i==index){
+            sum = val;
+        }
+
+        if((index + jump) == i){
+            sum = sum + val;
+        }
+        printf("%d ", val);
+        i++;
     }
 
-    sleep(5);
+    //printf("\nTotal Size of the array %d", i);
+
+    printf("\nThe sum for index=%d jump=%d and sum=%d", index, jump, sum);
+
+    fflush(stdout);
+
+    sleep(1);
     printf("\nchild process out of sleep");
+
+    
     fflush(stdout);
     return 0;
 }
