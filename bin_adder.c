@@ -4,9 +4,14 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <math.h>
 
 
 #define BUFF_SZ sizeof(int)
+
+int log2m(int x){
+    return ceil(log10(x)/log10(2));
+}
 
 int main(int argc, char *argv[]){
 
@@ -15,9 +20,16 @@ int main(int argc, char *argv[]){
     int shmid;
     int *shmptr;
     key_t key;
+    int segment_size;
+
+    int current_depth = atoi(argv[2]);
+
 
     int index = atoi(argv[1]);
-    int jump = atoi(argv[2]);
+    //int jump = atoi(argv[2]);
+
+    struct shmid_ds shmbuffer;
+
 
 
     key = 9876;
@@ -38,9 +50,23 @@ int main(int argc, char *argv[]){
 
     int val = 0;
 
+    /* Determine the segment’s size. */
+    shmctl (shmid, IPC_STAT, &shmbuffer);
+    segment_size = shmbuffer.shm_segsz;
+    printf ("segment size: %d\n", segment_size);
+
+    int arr_length = segment_size / sizeof(int);
+
+    printf("\nThe array size is:%d", arr_length);
+
+    int total_depth = log2m(arr_length);
+    printf("\nTotal Depth:%d", total_depth);
+
+    int jump = total_depth - current_depth + 1;
+
     printf("\nThe values from child: ");
 
-    while(*shmptr){
+    while(i < arr_length){
         val = *shmptr++;
         if(i==index){
             sum = val;
@@ -53,7 +79,8 @@ int main(int argc, char *argv[]){
         i++;
     }
 
-    //printf("\nTotal Size of the array %d", i);
+    printf("\nlast value %d:", *shmptr);
+
 
     printf("\nThe sum for index=%d jump=%d and sum=%d", index, jump, sum);
 

@@ -12,6 +12,10 @@
 char *childProcess = "./bin_adder";
 int lengthOfInput = 0;
 
+int log2m(int x){
+    return ceil(log10(x)/log10(2));
+}
+
 int *read_ints(const char *file_name)
 {
     FILE *file = fopen(file_name, "r");
@@ -94,6 +98,8 @@ void processBinaryAddition()
         n = n + sizeof(int);
     }
 
+    printf("\nDepth:%d\n", log2m(lengthOfInput));
+
     shmid = shmget(key, n, IPC_CREAT | 0666);
     if (shmid < 0)
     {
@@ -124,7 +130,10 @@ void processBinaryAddition()
     {
 
         shmptr[index] = 0;
+        inputNumbers++;
     }
+
+    inputNumbers = NULL;
 
     //int mydepth = log2(index); //calculate the depth
 
@@ -132,7 +141,7 @@ void processBinaryAddition()
 
     fflush(stdout);
 
-    pid_t cpid = create_child(0, 1);
+    pid_t cpid = create_child(0, 3);
 
     waitpid(cpid, NULL, 0);
 
