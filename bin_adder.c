@@ -5,6 +5,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <math.h>
+#include <time.h>
 
 
 #define BUFF_SZ sizeof(int)
@@ -14,9 +15,6 @@ int log2m(int x){
 }
 
 int main(int argc, char *argv[]){
-
-
-
     int shmid;
     int *shmptr;
     key_t key;
@@ -26,7 +24,7 @@ int main(int argc, char *argv[]){
 
 
     int index = atoi(argv[1]);
-    //int jump = atoi(argv[2]);
+
 
     struct shmid_ds shmbuffer;
 
@@ -34,7 +32,7 @@ int main(int argc, char *argv[]){
 
     key = 9876;
 
-    //printf("Child Process with argument index=%d jump=%d\n", index, jump);
+
     fflush(stdout);
 
     shmid = shmget(key, BUFF_SZ, 0666);
@@ -53,18 +51,17 @@ int main(int argc, char *argv[]){
     /* Determine the segment’s size. */
     shmctl (shmid, IPC_STAT, &shmbuffer);
     segment_size = shmbuffer.shm_segsz;
-    //printf ("segment size: %d\n", segment_size);
+
 
     int arr_length = segment_size / sizeof(int);
 
-    //printf("\nThe array size is:%d", arr_length);
 
     int total_depth = log2m(arr_length);
-    //printf("\nTotal Depth:%d", total_depth);
+
 
     int jump = total_depth - current_depth + 1;
 
-    //printf("\nThe values from child: ");
+
 
     while(i < arr_length){
         val = *shmptr++;
@@ -75,21 +72,18 @@ int main(int argc, char *argv[]){
         if((index + jump) == i){
             sum = sum + val;
         }
-        //printf("%d ", val);
+
         i++;
     }
 
-    //printf("\nlast value %d:", *shmptr);
 
+    struct timespec ts;
+    //timespec_get(&ts, TIME_UTC);
+    clock_gettime(CLOCK_REALTIME, &ts);
+    char buff[100];
+    strftime(buff, sizeof buff, "%D %T", gmtime(&ts.tv_sec));
 
-    printf("\nThe sum for index=%d jump=%d and sum=%d\n", index, jump, sum);
-
-    fflush(stdout);
-
-    //sleep(1);
-    //printf("\nchild process out of sleep");
-
-    
+    printf("\nThe sum for index=%d jump=%d and sum=%d - time %s.%09ld UTC\n\n", index, jump, sum, buff, ts.tv_nsec);
     fflush(stdout);
     return 0;
 }

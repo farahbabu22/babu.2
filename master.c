@@ -8,6 +8,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <math.h>
+#include <time.h>
 
 char *childProcess = "./bin_adder";
 int lengthOfInput = 0;
@@ -15,6 +16,16 @@ int maxChildren = 2;
 
 int log2m(int x){
     return ceil(log10(x)/log10(2));
+}
+
+
+
+
+
+void child_handler(int signum){
+    printf("\nChild Handler Invoked:%d", signum);
+    fflush(stdout);
+    //return;
 }
 
 int *read_ints(const char *file_name)
@@ -88,9 +99,25 @@ void runProcess(int depth, int totalLength){
 
     //pid_t childProcess[maxChildren - 1];
     //pid
+    int pr_limit  = 4;
+    int pr_count = 0;
 
     for(i=0; i<totalLength; i=i+nextIndex){
+        if(pr_count == pr_limit){
+
+            printf("\nProcess Limit reached\n");
+            fflush(stdout);
+            wait(NULL);
+            
+            pr_count--;
+            
+        }
+        pr_count++;
         create_child(i, depth);
+        if (waitpid(-1,NULL, WNOHANG) != 0)
+		{
+			pr_count--;
+		}
     }
 
     sleep(10);
@@ -115,7 +142,9 @@ void processBinaryAddition()
         n = n + sizeof(int);
     }
 
-    printf("\nDepth:%d\n", log2m(lengthOfInput));
+    int depth = log2m(lengthOfInput);
+
+    printf("\nDepth:%d\n", depth);
 
     shmid = shmget(key, n, IPC_CREAT | 0666);
     if (shmid < 0)
@@ -127,6 +156,7 @@ void processBinaryAddition()
     inputNumbers = read_ints("datafile");
 
     signal(SIGALRM, alarm_handler);
+
 
     shmptr = (int *)shmat(shmid, 0, 0);
     if (shmptr == (int *)-1)
@@ -154,13 +184,13 @@ void processBinaryAddition()
 
     fflush(stdout);
 
-    runProcess(2, index);
+    runProcess(depth, index);
 
-    //pid_t cpid = create_child(0, 3);
 
-    //waitpid(cpid, NULL, 0);
 
     printf("\nParent process closed");
+
+    wait(NULL);
 
     if (shmdt(shmptr) == -1)
         perror("Failed to detach");
