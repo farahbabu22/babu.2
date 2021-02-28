@@ -53,18 +53,18 @@ int main(int argc, char *argv[]){
     /* Determine the segment’s size. */
     shmctl (shmid, IPC_STAT, &shmbuffer);
     segment_size = shmbuffer.shm_segsz;
-    printf ("segment size: %d\n", segment_size);
+    //printf ("segment size: %d\n", segment_size);
 
     int arr_length = segment_size / sizeof(int);
 
-    printf("\nThe array size is:%d", arr_length);
+    //printf("\nThe array size is:%d", arr_length);
 
     int total_depth = log2m(arr_length);
-    printf("\nTotal Depth:%d", total_depth);
+    //printf("\nTotal Depth:%d", total_depth);
 
     int jump = total_depth - current_depth + 1;
 
-    printf("\nThe values from child: ");
+    //printf("\nThe values from child: ");
 
     while(i < arr_length){
         val = *shmptr++;
@@ -75,19 +75,19 @@ int main(int argc, char *argv[]){
         if((index + jump) == i){
             sum = sum + val;
         }
-        printf("%d ", val);
+        //printf("%d ", val);
         i++;
     }
 
-    printf("\nlast value %d:", *shmptr);
+    //printf("\nlast value %d:", *shmptr);
 
 
-    printf("\nThe sum for index=%d jump=%d and sum=%d", index, jump, sum);
+    printf("\nThe sum for index=%d jump=%d and sum=%d\n", index, jump, sum);
 
     fflush(stdout);
 
-    sleep(1);
-    printf("\nchild process out of sleep");
+    //sleep(1);
+    //printf("\nchild process out of sleep");
 
     
     fflush(stdout);

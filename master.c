@@ -11,6 +11,7 @@
 
 char *childProcess = "./bin_adder";
 int lengthOfInput = 0;
+int maxChildren = 2;
 
 int log2m(int x){
     return ceil(log10(x)/log10(2));
@@ -79,6 +80,22 @@ void alarm_handler(int signum)
     alarm(2);
 }
 
+void runProcess(int depth, int totalLength){
+    int i = 0; 
+    //int totalDepth = log2m(totalLength);
+    int nextIndex = 2;
+    //int currentActive = 0;
+
+    //pid_t childProcess[maxChildren - 1];
+    //pid
+
+    for(i=0; i<totalLength; i=i+nextIndex){
+        create_child(i, depth);
+    }
+
+    sleep(10);
+}
+
 void processBinaryAddition()
 {
     int *inputNumbers;
@@ -135,15 +152,13 @@ void processBinaryAddition()
 
     inputNumbers = NULL;
 
-    //int mydepth = log2(index); //calculate the depth
-
-    //printf("The depth is %d", mydepth);
-
     fflush(stdout);
 
-    pid_t cpid = create_child(0, 3);
+    runProcess(2, index);
 
-    waitpid(cpid, NULL, 0);
+    //pid_t cpid = create_child(0, 3);
+
+    //waitpid(cpid, NULL, 0);
 
     printf("\nParent process closed");
 
@@ -153,8 +168,12 @@ void processBinaryAddition()
     if (shmctl(shmid, IPC_RMID, NULL) == -1)
         perror("removeSegment failed");
 
+    sleep(5);
+
     fflush(stdout);
 }
+
+
 
 int main(int argc, char *argv[])
 {
