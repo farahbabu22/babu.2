@@ -12,10 +12,19 @@
 
 char *childProcess = "./bin_adder";
 int lengthOfInput = 0;
-int maxChildren = 2;
+int maxProcess = 3;
 
 int log2m(int x){
     return ceil(log10(x)/log10(2));
+}
+
+int power(int base, int exp){
+    int result = 1;
+    while(exp){
+        result *= base;
+        exp--;
+    }
+    return result;
 }
 
 
@@ -93,33 +102,39 @@ void alarm_handler(int signum)
 
 void runProcess(int depth, int totalLength){
     int i = 0; 
-    //int totalDepth = log2m(totalLength);
+
     int nextIndex = 2;
-    //int currentActive = 0;
 
-    //pid_t childProcess[maxChildren - 1];
-    //pid
-    int pr_limit  = 4;
+    int j=depth;
+
+
+
+ 
+    int pr_limit  = maxProcess - 1;
     int pr_count = 0;
+    int jump = 1;
 
-    for(i=0; i<totalLength; i=i+nextIndex){
-        if(pr_count == pr_limit){
+    for(j=depth; j>0; j--){
 
-            printf("\nProcess Limit reached\n");
-            fflush(stdout);
-            wait(NULL);
-            
-            pr_count--;
-            
+        nextIndex = power(2, jump++);
+        for(i=0; i<totalLength; i=i+nextIndex){
+            if(pr_count == pr_limit){
+
+                printf("\nProcess Limit reached\n");
+                fflush(stdout);
+                wait(NULL);
+                
+                pr_count--;
+                
+            }
+            pr_count++;
+            create_child(i, j);
+            if (waitpid(-1,NULL, WNOHANG) != 0)
+            {
+                pr_count--;
+            }
         }
-        pr_count++;
-        create_child(i, depth);
-        if (waitpid(-1,NULL, WNOHANG) != 0)
-		{
-			pr_count--;
-		}
     }
-
     sleep(10);
 }
 

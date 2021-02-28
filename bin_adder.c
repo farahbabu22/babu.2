@@ -14,6 +14,15 @@ int log2m(int x){
     return ceil(log10(x)/log10(2));
 }
 
+int power(int base, int exp){
+    int result = 1;
+    while(exp){
+        result *= base;
+        exp--;
+    }
+    return result;
+}
+
 int main(int argc, char *argv[]){
     int shmid;
     int *shmptr;
@@ -59,8 +68,10 @@ int main(int argc, char *argv[]){
     int total_depth = log2m(arr_length);
 
 
-    int jump = total_depth - current_depth + 1;
+    int jump = power(2, total_depth - current_depth);
 
+
+    int *intArray = shmptr;
 
 
     while(i < arr_length){
@@ -68,13 +79,13 @@ int main(int argc, char *argv[]){
         if(i==index){
             sum = val;
         }
-
         if((index + jump) == i){
             sum = sum + val;
         }
-
         i++;
     }
+
+    //printf("\nThe operation numbers %d:%d\n", *(intArray + index), *(intArray + index + jump));
 
 
     struct timespec ts;
@@ -83,7 +94,9 @@ int main(int argc, char *argv[]){
     char buff[100];
     strftime(buff, sizeof buff, "%D %T", gmtime(&ts.tv_sec));
 
-    printf("\nThe sum for index=%d jump=%d and sum=%d - time %s.%09ld UTC\n\n", index, jump, sum, buff, ts.tv_nsec);
+    printf("\nThe sum for totaldepth=%d, depth=%d, index=%d jump=%d, sum=%d  and nos: %d:%d- time %s.%09ld UTC\n\n", total_depth, current_depth, index, jump, sum, *(intArray + index), *(intArray + index + jump), buff, ts.tv_nsec);
+    *(intArray + index) = sum;
+    *(intArray + index + jump) = 0;
     fflush(stdout);
     return 0;
 }
