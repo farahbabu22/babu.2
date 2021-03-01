@@ -10,9 +10,21 @@
 #include <math.h>
 #include <time.h>
 
-char *childProcess = "./bin_adder";
+
+typedef enum {idle, want_in, in_cs} state; //making use of solution 4
+
+char *childProcess = "./bin_adder"; // to be used in excelp program
 int lengthOfInput = 0;
-int maxProcess = 3;
+int maxProcess = 20; // maximum alive processes
+
+int *shmturn; //shared memory for turn
+
+
+
+state *shmflag; //shared memory for flags
+
+pid_t *pidList; // shared memory for pid
+
 
 int log2m(int x){
     return ceil(log10(x)/log10(2));
@@ -28,14 +40,11 @@ int power(int base, int exp){
 }
 
 
-
-
-
 void child_handler(int signum){
     printf("\nChild Handler Invoked:%d", signum);
     fflush(stdout);
-    //return;
 }
+
 
 int *read_ints(const char *file_name)
 {
@@ -100,6 +109,103 @@ void alarm_handler(int signum)
     alarm(2);
 }
 
+void processIntSig(){
+    exit(EXIT_SUCCESS);
+}
+
+int initializeProcessList(){
+    int i = 0;
+
+    key_t key = ftok("datafile", 'a');
+    int shmid = shmget(key, sizeof(pid_t) * maxProcess, IPC_CREAT | 0666);
+    if(shmid < 0){
+        perror("shmget error");
+        
+    }
+
+    pidList = (pid_t *)shmat(shmid, 0, 0);
+    if(pidList == (pid_t *) -1){
+        perror("shmat error");
+    }
+    for (i = 0; i < maxProcess; i++)
+		pidList[i] = 0;
+
+    return shmid;
+}
+
+int initializeTurnVariable(){
+    
+
+    key_t key = ftok("makefile", 'a');
+    int shmid = shmget(key, sizeof(pid_t) * maxProcess, IPC_CREAT | 0666);
+    if(shmid < 0){
+        perror("shmget error");
+        
+    }
+
+    shmturn = (int *)shmat(shmid, 0, 0);
+    if(shmturn == (int *) -1){
+        perror("shmat error");
+    }
+
+    *shmturn = 0;
+
+    return shmid;
+}
+
+int initalizeFlagList(){
+    int i = 0;
+
+    key_t key = ftok("bin_adder.c", 'a');
+    int shmid = shmget(key, sizeof(state) * maxProcess, IPC_CREAT | 0666);
+    if(shmid < 0){
+        perror("shmget error");
+        
+    }
+
+    shmflag = (state *)shmat(shmid, 0, 0);
+    if(shmflag == (state *) -1){
+        perror("shmat error");
+    }
+
+    for (i = 0; i < maxProcess; i++)
+        shmflag[i] = idle;
+
+    return shmid;    
+}
+
+
+
+void printAllProcessList(){
+    int i = 0;
+    for (i = 0; i < maxProcess; i++)
+		printf("Process at %d:%ld", i, (long)pidList[i]);
+}
+
+
+int getEmptyProcessIndex(){
+    int i = 0;
+    for (i = 0; i < maxProcess; i++){
+        if(pidList[i] == 0)
+            return i;
+    }
+    return -1;
+}
+
+void removeProcessPID(pid_t p){
+    int i = 0;
+    printf("\nRemoving process id:%ld", (long) p);
+    for (i = 0; i < maxProcess; i++){
+        if(pidList[i] == p){
+            pidList[i] = 0;
+            break;
+        }
+    }
+            
+}
+
+
+
 void runProcess(int depth, int totalLength){
     int i = 0; 
 
@@ -107,36 +213,73 @@ void runProcess(int depth, int totalLength){
 
     int j=depth;
 
-
-
  
     int pr_limit  = maxProcess - 1;
     int pr_count = 0;
     int jump = 1;
+    int pidIndex = 0;
+
+   
+    pid_t p;
+
+
+
+    int shmid2, shmid3, shmid4;
+    shmid2 = initializeProcessList();
+    shmid3 = initalizeFlagList();
+    shmid4 = initializeTurnVariable();
+
+
+
 
     for(j=depth; j>0; j--){
-
         nextIndex = power(2, jump++);
         for(i=0; i<totalLength; i=i+nextIndex){
             if(pr_count == pr_limit){
 
                 printf("\nProcess Limit reached\n");
                 fflush(stdout);
-                wait(NULL);
-                
+                p = wait(NULL);
                 pr_count--;
-                
+                removeProcessPID(p);
             }
             pr_count++;
-            create_child(i, j);
-            if (waitpid(-1,NULL, WNOHANG) != 0)
+            pidIndex = getEmptyProcessIndex();
+            pidList[pidIndex] = create_child(i, j);
+            printf("args(%d, %d) : pid = %ld", i, j, (long) pidList[pidIndex]);
+            
+            if ((p = waitpid(-1,NULL, WNOHANG)) != 0)
             {
                 pr_count--;
+                removeProcessPID(p);
             }
         }
+        printAllProcessList();
     }
-    sleep(10);
+    sleep(2);
+
+    if (shmdt(pidList) == -1)
+        perror("Failed to detach");
+
+    if (shmctl(shmid2, IPC_RMID, NULL) == -1)
+        perror("removeSegment failed");
+
+    if (shmdt(shmflag) == -1)
+        perror("Failed to detach");
+
+    if (shmctl(shmid3, IPC_RMID, NULL) == -1)
+        perror("removeSegment failed");
+
+    if (shmdt(shmturn) == -1)
+        perror("Failed to detach");
+
+    if (shmctl(shmid4, IPC_RMID, NULL) == -1)
+        perror("removeSegment failed");
+    
+
 }
+
+
 
 void processBinaryAddition()
 {
@@ -144,9 +287,9 @@ void processBinaryAddition()
 
     int shmid;
     int *shmptr;
-    key_t key;
 
-    key = 9876;
+    key_t key = ftok("master.c", 'a');
+
     inputNumbers = read_ints("datafile");
 
     size_t n = sizeof(int) * lengthOfInput;
@@ -213,7 +356,7 @@ void processBinaryAddition()
     if (shmctl(shmid, IPC_RMID, NULL) == -1)
         perror("removeSegment failed");
 
-    sleep(5);
+    sleep(2);
 
     fflush(stdout);
 }
@@ -223,7 +366,33 @@ void processBinaryAddition()
 int main(int argc, char *argv[])
 {
 
-    processBinaryAddition();
+    //int opt;
 
+    signal(SIGINT, processIntSig);
+
+
+/*     if( argc == 1){
+        perror("Program is called with invalid arguments, please run help for this\n");
+        exit(EXIT_FAILURE);
+    }
+
+    while((opt = getopt(argc, argv, "hs:t:")) !=-1)
+    {
+        switch(opt){
+            case 'h':
+                    printf("\ninvoke the program with the following options\n");
+                    printf("master [-h] [-s i] [-t time] datafile\n");
+                    printf("master -s x\twhere is the number of child process supported\n");
+                    printf("master -t time\t maximum allowed execution time");
+                    printf("datafile \tInput file containing one integer on each line");
+                    break;
+            case 's':
+                    max_child        
+        }
+    }
+ */
+
+
+    processBinaryAddition();
     return 0;
 }
