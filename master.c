@@ -231,6 +231,8 @@ void runProcess(int depth, int totalLength){
 
 
 
+    pid_t wpid;
+    int status = 0;	
 
     for(j=depth; j>0; j--){
         nextIndex = power(2, jump++);
@@ -254,6 +256,7 @@ void runProcess(int depth, int totalLength){
                 removeProcessPID(p);
             }
         }
+	while((wpid = wait(&status)) > 0);
         printAllProcessList();
     }
     sleep(2);
