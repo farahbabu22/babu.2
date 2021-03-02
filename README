@@ -1,0 +1,76 @@
+# Assignment 2: Interprocess communication
+
+
+Author   : Farah Babu
+SSOID	 : fbkzx
+hoare	 : babu
+date	 : 28-Feb-2021
+
+# Files
+1. master.c - code of the project
+2. bin_adder.c
+3. makefile
+4. datafile
+
+
+## Building the program
+
+% make clean
+% make
+
+## Remove all executables after run
+
+% make clean
+
+## Description of the Assignment
+###### master.c
+1. Parent process
+2. Initializes three shared memory components
+    a. Array for integer calculations which is loaded from the file.
+    b. pidList - Process List of logical processes ID to keep a count of active running processes
+    c. shmflag - Flags shared memory array to indicate with the logical process id an intention to enter critical section
+    d. shmturn - To hold the shared variable for the turn. 
+3. All the shared memories were created using the following IPC apis
+    a. ftok to generate a unique key and set to key_t variable
+    b. shmget to initialize shared memory with key and size IPC_CREAT and permission 0666
+    c. shmat - to get the to the shared memory
+    d. shmctl - to remove removeSegment
+    e. shmdt - to detach memory
+    f. fork - to spawn off a new process
+    g. execlp - to execute the child process as a separate process.
+    h. waitpid - to wait for a specific process
+    i. wait - to wait for the process
+
+##### bin_adder.c
+1. get the argument index and depth of the binary tree
+2. Get the shared memory for 
+    a. Array list - input integers
+    b. pidList - Process List to help identify "i" of solution 4. Current process id index
+    c. shmflag - flags shared memory for critical section. 
+    d. shmturn - To hold the shared variable for the turn. 
+3. critical section implementation as per the solution 4. 
+
+###### Things working in the program
+> Was not able to complete the program fully
+> Shared memory allocation and access is working
+> when the process is completed memory is deallocated properly
+> Interprocess communication with child processes works properly using shared memory
+> fork/exec/wait/waitpid works properly. Waits for the depth to completed before moving onto the next
+> excelp takes in arguments and is kicked off properly
+> signal events working properly and processes getting killed
+> process limit is setup using the solution available in textbook. 
+> 
+
+###### How to run the program temporarily
+> Was not able to implement the getopts
+> run the program without any arguments
+> the program calls the child program as a separate process and passed the arguments
+> shared memory ipc occurs properly
+> was not able to get the output in to adder file so using stdout for output to show execution
+
+
+
+
+
+
+

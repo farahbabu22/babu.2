@@ -10,6 +10,14 @@
 #include <math.h>
 #include <time.h>
 
+/*
+ * author  : farah babu
+ * SSO ID  : fbkzx
+ * hoare   : babu
+ * date	   : 28-Feb-2021	
+ *
+ *
+ */
 
 typedef enum {idle, want_in, in_cs} state; //making use of solution 4
 
@@ -19,7 +27,7 @@ int maxProcess = 20; // maximum alive processes
 
 int *shmturn; //shared memory for turn
 
-
+int maxTimeout = 100; // timeout 
 
 state *shmflag; //shared memory for flags
 
@@ -103,16 +111,31 @@ pid_t create_child(int index, int depth)
     return pid;
 }
 
-void alarm_handler(int signum)
-{
-    printf("Alarm");
-    alarm(2);
+//To kill all processes
+void killAllProcess(){
+  int i = 0;
+  for(i=0;i<maxProcess;i++){
+ 	kill(pidList[i], SIGKILL);
+  }
+  exit(EXIT_SUCCESS);
 }
 
+
+//To handle alarm
+void alarm_handler(int signum)
+{
+   killAllProcess();
+    
+}
+
+
+//To handle ctrl c
 void processIntSig(){
+    killAllProcess();
     exit(EXIT_SUCCESS);
 }
 
+//Shared memory IPC with process list ids
 int initializeProcessList(){
     int i = 0;
 
@@ -133,6 +156,7 @@ int initializeProcessList(){
     return shmid;
 }
 
+//Shared memory Turn Variables 
 int initializeTurnVariable(){
     
 
@@ -257,7 +281,7 @@ void runProcess(int depth, int totalLength){
             }
         }
 	while((wpid = wait(&status)) > 0);
-        printAllProcessList();
+        //printAllProcessList();
     }
     sleep(2);
 
@@ -317,7 +341,7 @@ void processBinaryAddition()
     inputNumbers = read_ints("datafile");
 
     signal(SIGALRM, alarm_handler);
-
+    alarm(maxTimeout); //Timeout handler for this program 	
 
     shmptr = (int *)shmat(shmid, 0, 0);
     if (shmptr == (int *)-1)
@@ -349,7 +373,8 @@ void processBinaryAddition()
 
 
 
-    printf("\nParent process closed");
+    //printf("\nParent process closed");
+    printf("\nThe final result is:%d", shmptr[0]);
 
     wait(NULL);
 
@@ -371,7 +396,7 @@ int main(int argc, char *argv[])
 
     //int opt;
 
-    signal(SIGINT, processIntSig);
+    signal(SIGINT, processIntSig); //Process the ctrl c event
 
 
 /*     if( argc == 1){

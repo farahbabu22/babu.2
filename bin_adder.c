@@ -11,6 +11,17 @@
 #define BUFF_SZ sizeof(int)
 typedef enum {idle, want_in, in_cs} state; //making use of solution 4
 
+
+/*
+ *
+ * author : Farah Babu
+ * SSOID  : fbkzx
+ * hoare  : babu
+ * date	  : 28-Feb-2021
+ *
+ *
+ */
+
 state *shmflag;
 
 
