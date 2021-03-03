@@ -127,14 +127,10 @@ int findMyProcessIndex(){
 
 void critical_section(char *s){
 	FILE *fp;
-	time_t rawtime;
-	struct tm * timeinfo;
 
 	fp = fopen("adder_log", "a");
-	time(&rawtime);
-	timeinfo = localtime(&rawtime);
 
-	fprintf(fp, "time %s: getpid(): %ld\n", asctime(timeinfo), (long) getpid());
+	fprintf(fp, "%s", s);
 	fclose(fp);
 }
 
@@ -225,7 +221,9 @@ int main(int argc, char *argv[]){
     lpid = findMyProcessIndex();
 
     printf("\nThe sum for totaldepth=%d, depth=%d, lpid=%d, index=%d, %ld,  jump=%d, sum=%d  and nos: %d:%d- time %s.%09ld UTC\n\n", total_depth, current_depth, lpid, index, (long) getpid(), jump, sum, *(intArray + index), *(intArray + index + jump), buff, ts.tv_nsec);
-
+    char addLogStr[1000];
+    
+    
     *(intArray + index) = sum;
     *(intArray + index + jump) = 0;
 
@@ -252,7 +250,8 @@ int main(int argc, char *argv[]){
 
         }while((j < arr_length) || (*shmturn != lpid && shmflag[*shmturn] != idle));
         *shmturn = lpid;
-        critical_section("hello");
+        snprintf(addLogStr, 1000, "Process id: %ld The sum for index: %d & depth: %d is %d and time %s.%09ld UTC\n",(long) getpid(), index, current_depth, sum, buff, ts.tv_nsec); 
+	critical_section(addLogStr);
         printf("\nhello");
         fflush(stdout);
 
