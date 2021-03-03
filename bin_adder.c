@@ -190,19 +190,6 @@ int main(int argc, char *argv[]){
 
     int *intArray = shmptr;
 
-
-    /*while(i < arr_length){
-        val = *shmptr++;
-        if(i==index){
-            sum = val;
-        }
-        if((index + jump) == i){
-            sum = sum + val;
-        }
-        i++;
-    }*/
-
-    //printf("\nThe operation numbers %d:%d\n", *(intArray + index), *(intArray + index + jump));
     sum = *(intArray + index) + *(intArray + index + jump);
  
 
@@ -220,7 +207,7 @@ int main(int argc, char *argv[]){
     copyTurnVariable();
     lpid = findMyProcessIndex();
 
-    printf("\nThe sum for totaldepth=%d, depth=%d, lpid=%d, index=%d, %ld,  jump=%d, sum=%d  and nos: %d:%d- time %s.%09ld UTC\n\n", total_depth, current_depth, lpid, index, (long) getpid(), jump, sum, *(intArray + index), *(intArray + index + jump), buff, ts.tv_nsec);
+    //printf("\nThe sum for totaldepth=%d, depth=%d, lpid=%d, index=%d, %ld,  jump=%d, sum=%d  and nos: %d:%d- time %s.%09ld UTC\n\n", total_depth, current_depth, lpid, index, (long) getpid(), jump, sum, *(intArray + index), *(intArray + index + jump), buff, ts.tv_nsec);
     char addLogStr[1000];
     
     
@@ -236,8 +223,6 @@ int main(int argc, char *argv[]){
         do{
             shmflag[lpid] = want_in;
             j = *shmturn;
-            printf("test");
-            fflush(stdout);
             while( j!= lpid){
                 j = (shmflag[j] != idle) ? *shmturn : ( j + 1) % arr_length;
             }
@@ -252,8 +237,6 @@ int main(int argc, char *argv[]){
         *shmturn = lpid;
         snprintf(addLogStr, 1000, "Process id: %ld The sum for index: %d & depth: %d is %d and time %s.%09ld UTC\n",(long) getpid(), index, current_depth, sum, buff, ts.tv_nsec); 
 	critical_section(addLogStr);
-        printf("\nhello");
-        fflush(stdout);
 
         j = ( *shmturn + 1) % arr_length;
         while(shmflag[j] == idle){

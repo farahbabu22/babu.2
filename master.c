@@ -219,7 +219,7 @@ int getEmptyProcessIndex(){
 
 void removeProcessPID(pid_t p){
     int i = 0;
-    printf("\nRemoving process id:%ld", (long) p);
+    //printf("\nRemoving process id:%ld", (long) p);
     for (i = 0; i < maxProcess; i++){
         if(pidList[i] == p){
             pidList[i] = 0;
@@ -264,8 +264,8 @@ void runProcess(int depth, int totalLength){
         for(i=0; i<totalLength; i=i+nextIndex){
             if(pr_count == pr_limit){
 
-                printf("\nProcess Limit reached\n");
-                fflush(stdout);
+                //printf("\nProcess Limit reached\n");
+                //fflush(stdout);
                 p = wait(NULL);
                 pr_count--;
                 removeProcessPID(p);
@@ -284,7 +284,7 @@ void runProcess(int depth, int totalLength){
 	while((wpid = wait(&status)) > 0);
         //printAllProcessList();
     }
-    sleep(2);
+    //sleep(2);
 
     if (shmdt(pidList) == -1)
         perror("Failed to detach");
@@ -385,7 +385,7 @@ void processBinaryAddition()
     if (shmctl(shmid, IPC_RMID, NULL) == -1)
         perror("removeSegment failed");
 
-    sleep(2);
+    //sleep(2);
 
     fflush(stdout);
 }
