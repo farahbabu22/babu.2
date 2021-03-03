@@ -221,6 +221,7 @@ int main(int argc, char *argv[]){
     
     copySharedProcessList();
     copyFlagsList();
+    copyTurnVariable();
     lpid = findMyProcessIndex();
 
     printf("\nThe sum for totaldepth=%d, depth=%d, lpid=%d, index=%d, %ld,  jump=%d, sum=%d  and nos: %d:%d- time %s.%09ld UTC\n\n", total_depth, current_depth, lpid, index, (long) getpid(), jump, sum, *(intArray + index), *(intArray + index + jump), buff, ts.tv_nsec);

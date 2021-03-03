@@ -23,7 +23,7 @@ typedef enum {idle, want_in, in_cs} state; //making use of solution 4
 
 char *childProcess = "./bin_adder"; // to be used in excelp program
 int lengthOfInput = 0;
-int maxProcess = 20; // maximum alive processes
+int maxProcess = 19; // maximum alive processes
 
 int *shmturn; //shared memory for turn
 
@@ -161,7 +161,8 @@ int initializeTurnVariable(){
     
 
     key_t key = ftok("makefile", 'a');
-    int shmid = shmget(key, sizeof(pid_t) * maxProcess, IPC_CREAT | 0666);
+    //int shmid = shmget(key, sizeof(pid_t) * maxProcess, IPC_CREAT | 0666);
+    int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
     if(shmid < 0){
         perror("shmget error");
         
@@ -238,7 +239,7 @@ void runProcess(int depth, int totalLength){
     int j=depth;
 
  
-    int pr_limit  = maxProcess - 1;
+    int pr_limit  = maxProcess;
     int pr_count = 0;
     int jump = 1;
     int pidIndex = 0;
