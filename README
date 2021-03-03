@@ -40,6 +40,7 @@ date	 : 28-Feb-2021
     g. execlp - to execute the child process as a separate process.
     h. waitpid - to wait for a specific process
     i. wait - to wait for the process
+4. outputs to the total result to output.log
 
 ##### bin_adder.c
 1. get the argument index and depth of the binary tree
@@ -48,7 +49,8 @@ date	 : 28-Feb-2021
     b. pidList - Process List to help identify "i" of solution 4. Current process id index
     c. shmflag - flags shared memory for critical section. 
     d. shmturn - To hold the shared variable for the turn. 
-3. critical section implementation as per the solution 4. 
+3. critical section implementation as per the solution 4.
+4. outputs the result to adder_log 
 
 ###### Things working in the program
 > Was not able to complete the program fully
@@ -59,14 +61,18 @@ date	 : 28-Feb-2021
 > excelp takes in arguments and is kicked off properly
 > signal events working properly and processes getting killed
 > process limit is setup using the solution available in textbook. 
-> 
+> generates the file adder_log and output.log
 
 ###### How to run the program temporarily
 > Was not able to implement the getopts
 > run the program without any arguments
 > the program calls the child program as a separate process and passed the arguments
 > shared memory ipc occurs properly
-> was not able to get the output in to adder file so using stdout for output to show execution
+> generates adder_log and output.log 
+
+### Pending items
+> getopts
+> 
 
 
 

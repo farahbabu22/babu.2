@@ -11,4 +11,4 @@ bin_adder: $(CLASSES)
 	$(CC) -o $@ $^ $(CXXFLAGS) $@.c -lm
 
 clean:
-	rm -rf *.o *~ *.gch *.swp *.dSYM *.tar.gz master bin_adder adder_log
+	rm -rf *.o *~ *.gch *.swp *.dSYM *.tar.gz master bin_adder adder_log output.log

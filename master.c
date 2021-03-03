@@ -273,7 +273,8 @@ void runProcess(int depth, int totalLength){
             pr_count++;
             pidIndex = getEmptyProcessIndex();
             pidList[pidIndex] = create_child(i, j);
-            printf("args(%d, %d) : pid = %ld", i, j, (long) pidList[pidIndex]);
+            
+            //printf("args(%d, %d) : pid = %ld", i, j, (long) pidList[pidIndex]);
             
             if ((p = waitpid(-1,NULL, WNOHANG)) != 0)
             {
@@ -307,7 +308,14 @@ void runProcess(int depth, int totalLength){
 
 }
 
+void printToOutput(char *s){
+        FILE *fp;
 
+        fp = fopen("output.log", "a");
+
+        fprintf(fp, "%s", s);
+        fclose(fp);
+}
 
 void processBinaryAddition()
 {
@@ -330,7 +338,7 @@ void processBinaryAddition()
 
     int depth = log2m(lengthOfInput);
 
-    printf("\nDepth:%d\n", depth);
+   // printf("\nDepth:%d\n", depth);
 
     shmid = shmget(key, n, IPC_CREAT | 0666);
     if (shmid < 0)
@@ -354,7 +362,7 @@ void processBinaryAddition()
     int index = 0;
     while (index < lengthOfInput)
     {
-        printf("%d ", *inputNumbers);
+        //printf("%d ", *inputNumbers);
         shmptr[index++] = *inputNumbers;
         inputNumbers++;
     }
@@ -375,8 +383,11 @@ void processBinaryAddition()
 
 
     //printf("\nParent process closed");
-    printf("\nThe final result is:%d", shmptr[0]);
+    //printf("\nThe final result is:%d", shmptr[0]);
 
+    char resultStr[512];
+    snprintf(resultStr, 512,"The final result is:%d\n", shmptr[0]);
+    printToOutput(resultStr);
     wait(NULL);
 
     if (shmdt(shmptr) == -1)
